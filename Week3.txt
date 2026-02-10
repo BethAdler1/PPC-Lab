@@ -1,1 +1,284 @@
+Setting environment for MariaDB 12.1 (x64)
 
+C:\Windows\System32>mariadb -u root -p
+Enter password: ****
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 3
+Server version: 12.1.2-MariaDB MariaDB Server
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> SELECT User FROM mysql.user;
++-------------+
+| User        |
++-------------+
+| PUBLIC      |
+| root        |
+| root        |
+| root        |
+| bethany     |
+| mariadb.sys |
+| root        |
++-------------+
+7 rows in set (0.030 sec)
+
+MariaDB [(none)]> exit;
+Bye
+
+C:\Windows\System32>mariadb -u bethany -p
+Enter password: ***********
+ERROR 1045 (28000): Access denied for user 'bethany'@'localhost' (using password: YES)
+
+C:\Windows\System32>mariadb -u bethany -p
+Enter password: ***********
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 5
+Server version: 12.1.2-MariaDB MariaDB Server
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> show databases
+    -> ;
++--------------------+
+| Database           |
++--------------------+
+| adler_db           |
+| information_schema |
+| test               |
++--------------------+
+3 rows in set (0.012 sec)
+
+MariaDB [(none)]> USE adler_db
+Database changed
+MariaDB [adler_db]> SELECT count(*) as RowCount from vets;
++----------+
+| RowCount |
++----------+
+|    58252 |
++----------+
+1 row in set (0.052 sec)
+
+MariaDB [adler_db]> SELECT count(*) FROM vets WHERE trim(state) = state;
++----------+
+| count(*) |
++----------+
+|       82 |
++----------+
+1 row in set (0.023 sec)
+
+MariaDB [adler_db]> DESCRIBE vets;
++-------+--------------+------+-----+---------+-------+
+| Field | Type         | Null | Key | Default | Extra |
++-------+--------------+------+-----+---------+-------+
+| lname | varchar(100) | YES  |     | NULL    |       |
+| fname | varchar(100) | YES  |     | NULL    |       |
+| town  | varchar(100) | YES  |     | NULL    |       |
+| state | varchar(20)  | YES  |     | NULL    |       |
++-------+--------------+------+-----+---------+-------+
+4 rows in set (0.021 sec)
+
+MariaDB [adler_db]> SELECT COUNT(*) FROM vets WHERE (lname IS NULL OR TRIM(lname) = '') AND (fname IS NULL OR TRIM (fname) = '')AND (town IS NULL OR TRIM(town) = '') AND (state IS NULL OR TRIM(state) = '');
+ERROR 1630 (42000): FUNCTION adler_db.TRIM does not exist. Check the 'Function Name Parsing and Resolution' section in the Reference Manual
+MariaDB [adler_db]> SELECT COUNT(*) FROM vets WHERE (lname IS NULL OR TRIM(lname) = '') AND (fname IS NULL OR TRIM(fname) = '')AND (town IS NULL OR TRIM(town) = '') AND (state IS NULL OR TRIM(state) = '');
++----------+
+| COUNT(*) |
++----------+
+|       82 |
++----------+
+1 row in set (0.020 sec)
+
+MariaDB [adler_db]> DELETE FROM vets WHERE (lname IS NULL OR TRIM(lname) = '') AND (fname IS NULL OR TRIM(fname) = '')AND (town IS NULL OR TRIM(town) = '') AND (state IS NULL OR TRIM(state) = '');
+Query OK, 82 rows affected (0.061 sec)
+
+MariaDB [adler_db]>  SELECT COUNT(*) FROM vets WHERE (lname IS NULL OR TRIM(lname) = '') AND (fname IS NULL OR TRIM(fname) = '')AND (town IS NULL OR TRIM(town) = '') AND (state IS NULL OR TRIM(state) = '');
++----------+
+| COUNT(*) |
++----------+
+|        0 |
++----------+
+1 row in set (0.032 sec)
+
+MariaDB [adler_db]> UPDATE vets SET state = TRIM(state);
+Query OK, 58170 rows affected (0.254 sec)
+Rows matched: 58170  Changed: 58170  Warnings: 0
+
+MariaDB [adler_db]> UPDATE vets SET lname = TRIM(lname), fname = TRIM(fname),town = TRIM(town);
+Query OK, 58170 rows affected (0.319 sec)
+Rows matched: 58170  Changed: 58170  Warnings: 0
+
+MariaDB [adler_db]> SELECT fname as "First Name",lname as"Last Name", town, state FROM vets WHERE fname LIKE 'GUADALUPE%';
++-------------------+-----------+-------------+-------+
+| First Name        | Last Name | town        | state |
++-------------------+-----------+-------------+-------+
+| GUADALUPE MASIAS  | ALVAREZ   | DONNA       | TX    |
+| GUADALUPE         | FLORES    | BEXAR       | TX    |
+| GUADALUPE JR      | GALINDO   | ROCKPORT    | TX    |
+| GUADALUPE B L     | GARIBAY   | SAN DIEGO   | CA    |
+| GUADALUPE         | GONZALEZ  | ALICE       | TX    |
+| GUADALUPE MENDOZA | LEAL      | QUITAQUE    | TX    |
+| GUADALUPE         | LERMA     | EDCOUCH     | TX    |
+| GUADALUPE         | MARTINEZ  | LAREDO      | TX    |
+| GUADALUPE ESPARZA | MONTOYA   | ARGO        | IL    |
+| GUADALUPE         | PEREZ     | SAN JOAQUIN | CA    |
+| GUADALUPE JR      | PRADO     | MERCEDES    | TX    |
+| GUADALUPE         | RENDON    | CASA GRANDE | AZ    |
+| GUADALUPE NATAL   | ZUNIGA    | SAN ANTONIO | TX    |
++-------------------+-----------+-------------+-------+
+13 rows in set (0.025 sec)
+
+MariaDB [adler_db]> SELECT COUNT(*) FROM vets WHERE town LIKE 'LOS %';
++----------+
+| COUNT(*) |
++----------+
+|      581 |
++----------+
+1 row in set (0.030 sec)
+
+MariaDB [adler_db]> SELECT COUNT(*) AS LosAngelesCount FROM vets WHERE town = 'LOS ANGELES'; SELECT COUNT(*) AS OtherLos FROM vets WHERE town LIKE 'LOS %' AND NOT town = 'Los Angeles';
++-----------------+
+| LosAngelesCount |
++-----------------+
+|             538 |
++-----------------+
+1 row in set (0.042 sec)
+
++----------+
+| OtherLos |
++----------+
+|       43 |
++----------+
+1 row in set (0.026 sec)
+
+MariaDB [adler_db]> SELECT state, COUNT(*) AS Count FROM vets WHERE town LIKE 'LOS %' AND town != 'LOS ANGELES' GROUP BY state;
++-------+-------+
+| state | Count |
++-------+-------+
+| CA    |    34 |
+| NM    |     6 |
+| TX    |     3 |
++-------+-------+
+3 rows in set (0.035 sec)
+
+MariaDB [adler_db]> SELECT * FROM vets WHERE state = 'GU' ORDER BY lname ASC;
++-------------+---------------------+---------------------------+-------+
+| lname       | fname               | town                      | state |
++-------------+---------------------+---------------------------+-------+
+| AGUON       | JOSE QUINATA        | UMATAC                    | GU    |
+| ASANOMA     | FRANCISCO M         | INARAJAN                  | GU    |
+| BENAVENTE   | DAVID GUERRERO      | DEDEDO                    | GU    |
+| BIAGINI     | MARK FREDERICK      | MANGILAO                  | GU    |
+| BLAS        | ANTHONY MARTIN M    | YONA                      | GU    |
+| BLAZ        | JAMES LUJAN         | DEDEDO                    | GU    |
+| BORJA       | JUAN SANTOS         | AGANA                     | GU    |
+| CABRERA     | JOAQUIN PALACIOS    | PIQUA MERIZO              | GU    |
+| CAMACHO     | DAVID BITANGA       | TAMUNING                  | GU    |
+| CARTER      | DONALD SUMINGUIT    | DEDEDO                    | GU    |
+| CASTRO      | JUAN PASCUAL R      | MONGMONG                  | GU    |
+| CEPEDA      | JUAN DUENAS         | DEDEDO                    | GU    |
+| CRUZ        | EDWARD CRUZ         | INARAJAN                  | GU    |
+| CRUZ        | ENRIQUE SALAS       | SANTA RITA                | GU    |
+| CRUZ        | JOSEPH AGUIGUI      | MERICO                    | GU    |
+| CRUZ        | JOSEPH WILLIAM      | AGANA HEIGHTS             | GU    |
+| CRUZ        | PEDRO AFLAGUE       | AGANA                     | GU    |
+| CUASITO     | RONALD PEREZ        | TAMVNING                  | GU    |
+| DAMIAN      | ALLAN JAMES         | AGANA                     | GU    |
+| DE LEON     | HERMAN BORJA        | AGANA                     | GU    |
+| DELA-CRUZ   | FREDERICO V         | AGANA                     | GU    |
+| DIAZ        | EDWARD REYES        | PITI                      | GU    |
+| DOYLE       | ALBERT BARCINAS     | MERIZO                    | GU    |
+| DUENAS      | JOSE BAMBA          | TOTO                      | GU    |
+| EAY         | RUDY EDEJER         | TAMUNING                  | GU    |
+| ESCANO      | JUANITO MAIQUEZ     | AGANA                     | GU    |
+| ESPINOSA    | VICENTE T           | MERIZO                    | GU    |
+| ESTEVES     | FERNANDO BARCINAS   | MERIZO                    | GU    |
+| EUSTAQUIO   | JOSEPH MARTIN       | YONA                      | GU    |
+| FINNEY      | HAROLD JAMES JR     | ASAN                      | GU    |
+| FLORES      | BENNY SAN NICOLAS   | MERIZO                    | GU    |
+| FLORES      | DAVID CRUZ          | AGANA                     | GU    |
+| FUNES       | DAVID JOHN          | BARRIGADA                 | GU    |
+| GORTON      | DAVID ATOIGUE       | TALOFOFO                  | GU    |
+| GUERRERO    | PEDRO ROSARIO       | BARRIGADA                 | GU    |
+| GUERRERO    | VINCENT FEJA        | SINAJANA                  | GU    |
+| HERRERA     | JOSE BABAUTA        | AGAT                      | GU    |
+| MARIANO     | JESUS ROSA          | MANGILAO                  | GU    |
+| MENDIOLA    | ROBERT L G          | AGANA                     | GU    |
+| MENO        | JESUS QUINENE       | INARAJAN                  | GU    |
+| MESA        | TOMAS REYES         | AGAT                      | GU    |
+| MOREHAM     | VINCENT PINAULA     | SINAJANA                  | GU    |
+| NEDEDOG     | EMILIO NINAISEN     | AGAT                      | GU    |
+| PANGELINAN  | GREGORIO L          | MONGMONG                  | GU    |
+| PANGELINAN  | PEDRO CABRERA       | AGANA                     | GU    |
+| PEREDA      | HENRY PANGELINAN    | AGANA                     | GU    |
+| PEREZ       | JOHN ANTHONY        | DEDEDO                    | GU    |
+| PEREZ       | VICENTE DUENAS      | MONGMONG                  | GU    |
+| QUENGA      | JOHNNY CRUZ         | AGAT                      | GU    |
+| QUIDACHAY   | JESUS AQUININGO     | UMATAC                    | GU    |
+| REYES       | TOMAS GARCIA        | AGANA                     | GU    |
+| RIPPEL      | EUGENE RAYMOND      | DEDEDO                    | GU    |
+| RIVERA      | THOMAS SALAS        | AGAT                      | GU    |
+| RODRIGUEZ   | LUCAS HERRERA       | AGAT                      | GU    |
+| SABLAN      | ANTONIO QUICHOCHO   | YIGO                      | GU    |
+| SABLAN      | IGNACIO ESPINOSA    | SANTA RITA                | GU    |
+| SABLAN      | JOHN TENERIO        | AGANA                     | GU    |
+| SABLAN      | THOMAS QUICHOCHO    | YIGO                      | GU    |
+| SAN NICOLAS | RUFO SANTOS         | SINAJANA                  | GU    |
+| SAN NICOLAS | VICTOR P            | INARAJAN                  | GU    |
+| SANCHEZ     | GEORGE SANTIAGO     | UMATAC                    | GU    |
+| SANTOS      | ENRIQUE ROSARIO     | SINAJANA                  | GU    |
+| SANTOS      | ERNEST PABLO        | TALOFOFO                  | GU    |
+| SANTOS      | JAMES EDWARD ANDER  | DEDEDO                    | GU    |
+| SANTOS      | RAFAEL SALAS        | AGANA                     | GU    |
+| TAITAGUE    | JOHNNY SALAS        | TALOFOFO                  | GU    |
+| TORRE       | FRANCIS SAN NICOLAS | MANGILAO                  | GU    |
+| TORRES      | PRISHARDO JOSE T    | AGANA                     | GU    |
+| VIOLETT     | JAMES EDWARD        | ------------------------- | GU    |
+| YOKOI       | RALPHAEL SGAMBELLUR | MONGMONG                  | GU    |
++-------------+---------------------+---------------------------+-------+
+70 rows in set (0.015 sec)
+
+MariaDB [adler_db]> create table States(State varchar(30), Abbreviation varchar(10)
+    -> primary key);
+Query OK, 0 rows affected (0.023 sec)
+
+MariaDB [adler_db]> LOAD DATA LOCAL INFILE 'C:/Users/badle/OneDrive/PPC/states.csv INTO TABLE States FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n' IGNORE 1 ROWS;
+    ">  LOAD DATA LOCAL INFILE 'C:/Users/badle/OneDrive/PPC/states.csv' INTO TABLE States FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n' IGNORE 1 ROWS;
+ERROR 2005 (HY000): Unknown server host 'IGNORE' (11001)
+unknown [n']> '
+    '> ;
+    '> ;
+    '> ';
+No connection. Trying to reconnect...
+ERROR 2005 (HY000): Unknown server host 'IGNORE' (11001)
+ERROR: Can't connect to the server
+
+unknown [n']> Bye
+Ctrl-C -- exit!
+
+C:\Windows\System32>mariadb -u bethany -p
+Enter password: ***********
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 6
+Server version: 12.1.2-MariaDB MariaDB Server
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> USE adler_db
+Database changed
+MariaDB [adler_db]> LOAD DATA LOCAL INFILE 'C:/Users/badle/OneDrive/PPC/states.csv' INTO TABLE States FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n' IGNORE 1 ROWS;
+Query OK, 0 rows affected (0.008 sec)
+Records: 0  Deleted: 0  Skipped: 0  Warnings: 0
+
+MariaDB [adler_db]> DESCRIBE States;
++--------------+-------------+------+-----+---------+-------+
+| Field        | Type        | Null | Key | Default | Extra |
++--------------+-------------+------+-----+---------+-------+
+| State        | varchar(30) | YES  |     | NULL    |       |
+| Abbreviation | varchar(10) | NO   | PRI | NULL    |       |
++--------------+-------------+------+-----+---------+-------+
+2 rows in set (0.012 sec)
