@@ -1,0 +1,361 @@
+Week4 
+EXercise1:
+MariaDB [adler_db]> SELECT state, COUNT(*) AS cnt FROM vets ORDER BY cnt DESC;
++-------+-------+
+| state | cnt   |
++-------+-------+
+| SD    | 58170 |
++-------+-------+
+1 row in set (0.011 sec)
+
+MariaDB [adler_db]> SELECT state, COUNT(*) AS cnt FROM vets GROUP BY state ORDER BY cnt DESC;
++-------+------+
+| state | cnt  |
++-------+------+
+| CA    | 5575 |
+| NY    | 4120 |
+| TX    | 3414 |
+| PA    | 3141 |
+| OH    | 3092 |
+| IL    | 2930 |
+| MI    | 2654 |
+| FL    | 1950 |
+| NC    | 1609 |
+| GA    | 1583 |
+| IN    | 1531 |
+| NJ    | 1484 |
+| MO    | 1411 |
+| MA    | 1322 |
+| VA    | 1304 |
+| TN    | 1291 |
+| AL    | 1207 |
+| WI    | 1160 |
+| MN    | 1072 |
+| KY    | 1055 |
+| WA    | 1050 |
+| MD    | 1014 |
+| OK    |  988 |
+| SC    |  895 |
+| LA    |  882 |
+| IA    |  852 |
+| WV    |  731 |
+| OR    |  709 |
+| MS    |  637 |
+| KS    |  626 |
+| AZ    |  622 |
+| CO    |  619 |
+| CT    |  612 |
+| AR    |  588 |
+| NM    |  399 |
+| NE    |  395 |
+| UT    |  365 |
+| PR    |  345 |
+| ME    |  342 |
+| HI    |  277 |
+| MT    |  268 |
+| DC    |  241 |
+| NH    |  227 |
+| ID    |  217 |
+| RI    |  207 |
+| ND    |  198 |
+| SD    |  195 |
+| NV    |  151 |
+| DE    |  122 |
+| WY    |  119 |
+| VT    |  100 |
+| GU    |   70 |
+| XC    |   58 |
+| AK    |   57 |
+| XP    |   32 |
+| VQ    |   15 |
+| XG    |    7 |
+| XM    |    5 |
+| SO    |    4 |
+| XJ    |    4 |
+| XB    |    3 |
+| XN    |    3 |
+| ZZ    |    3 |
+| XE    |    3 |
+| XF    |    2 |
+| XI    |    2 |
+| CZ    |    2 |
+| XS    |    1 |
+| XA    |    1 |
++-------+------+
+69 rows in set (0.041 sec)
+MariaDB [adler_db]> SELECT DISTINCT v.state FROM vets v LEFT JOIN States s ON  v.state = s.state WHERE s.state IS NULL;
++-------+
+| state |
++-------+
+| SD    |
+| TX    |
+| MN    |
+| WA    |
+| MA    |
+| FL    |
+| DC    |
+| PA    |
+| NJ    |
+| IL    |
+| NY    |
+| MO    |
+| CA    |
+| TN    |
+| VA    |
+| CO    |
+| IN    |
+| LA    |
+| WI    |
+| NH    |
+| ME    |
+| KY    |
+| NC    |
+| MD    |
+| NM    |
+| IA    |
+| OK    |
+| WV    |
+| MI    |
+| AL    |
+| OR    |
+| HI    |
+| PR    |
+| KS    |
+| OH    |
+| UT    |
+| NV    |
+| XP    |
+| AR    |
+| AZ    |
+| GA    |
+| ID    |
+| MS    |
+| RI    |
+| SC    |
+| DE    |
+| NE    |
+| GU    |
+| CT    |
+| ND    |
+| WY    |
+| MT    |
+| AK    |
+| XJ    |
+| VT    |
+| VQ    |
+| XS    |
+| XC    |
+| XB    |
+| ZZ    |
+| XI    |
+| XN    |
+| XE    |
+| XG    |
+| XM    |
+| XF    |
+| SO    |
+| XA    |
+| CZ    |
++-------+
+69 rows in set (0.056 sec
+MariaDB [(none)]> use mynewpaltz
+Database changed
+MariaDB [mynewpaltz]> show tables
+    -> ;
++----------------------+
+| Tables_in_mynewpaltz |
++----------------------+
+| coursetable          |
+| enrollmenttable      |
+| studenttable         |
++----------------------+
+3 rows in set (0.002 sec)
+
+MariaDB [mynewpaltz]> USE employee
+Database changed
+MariaDB [employee]> show tables;
++--------------------+
+| Tables_in_employee |
++--------------------+
+| departments        |
+| employees          |
++--------------------+
+2 rows in set (0.002 sec)
+Ex 2: 
+MariaDB [adler_db]> USE employee
+Database changed
+MariaDB [employee]> SELECT e.name, d.department_name FROM employees e INNER JOIN departments d ON e.department_id = d.id;
++---------+------------------+
+| name    | department_name  |
++---------+------------------+
+| Charlie | HR               |
+| Frank   | HR               |
+| Paul    | HR               |
+| Wendy   | HR               |
+| Alice   | Engineering      |
+| Bob     | Engineering      |
+| Jack    | Engineering      |
+| Quincy  | Engineering      |
+| Xander  | Engineering      |
+| Grace   | Marketing        |
+| Olivia  | Marketing        |
+| Victor  | Marketing        |
+| David   | Finance          |
+| Emma    | Finance          |
+| Rachel  | Finance          |
+| Hank    | Sales            |
+| Ivy     | Sales            |
+| Zach    | Sales            |
+| Karen   | IT               |
+| Laura   | IT               |
+| Tracy   | IT               |
+| Mike    | Customer Support |
+| Nina    | Customer Support |
+| Uma     | Customer Support |
++---------+------------------+
+24 rows in set (0.009 sec)
+
+MariaDB [employee]> SELECT e.name, d.department_name FROM employees e LEFT JOIN departments d ON e.department_id = d.id;
++---------+------------------+
+| name    | department_name  |
++---------+------------------+
+| Alice   | Engineering      |
+| Bob     | Engineering      |
+| Charlie | HR               |
+| David   | Finance          |
+| Emma    | Finance          |
+| Frank   | HR               |
+| Grace   | Marketing        |
+| Hank    | Sales            |
+| Ivy     | Sales            |
+| Jack    | Engineering      |
+| Karen   | IT               |
+| Laura   | IT               |
+| Mike    | Customer Support |
+| Nina    | Customer Support |
+| Olivia  | Marketing        |
+| Paul    | HR               |
+| Quincy  | Engineering      |
+| Rachel  | Finance          |
+| Steve   | NULL             |
+| Tracy   | IT               |
+| Uma     | Customer Support |
+| Victor  | Marketing        |
+| Wendy   | HR               |
+| Xander  | Engineering      |
+| Yvonne  | NULL             |
+| Zach    | Sales            |
++---------+------------------+
+26 rows in set (0.006 sec)
+
+MariaDB [employee]> SELECT e.name AS employee, m.name AS manager FROM employees e INNER JOIN employees m ON e.manager_id = m.id;
++----------+---------+
+| employee | manager |
++----------+---------+
+| Alice    | Jack    |
+| Bob      | Jack    |
+| David    | Emma    |
+| Frank    | Charlie |
+| Ivy      | Hank    |
+| Karen    | Laura   |
+| Mike     | Nina    |
+| Olivia   | Grace   |
+| Paul     | Charlie |
+| Quincy   | Jack    |
+| Rachel   | Emma    |
+| Tracy    | Laura   |
+| Uma      | Nina    |
+| Victor   | Grace   |
+| Wendy    | Charlie |
+| Xander   | Jack    |
+| Zach     | Hank    |
++----------+---------+
+17 rows in set (0.007 sec)
+
+MariaDB [employee]> SELECT d.department_nam, e.name FROM departments d LEFT JOIN employees e ON d.id = e.department_id;
+ERROR 1054 (42S22): Unknown column 'd.department_nam' in 'SELECT'
+MariaDB [employee]> SELECT d.department_name, e.name FROM departments d LEFT JOIN employees e ON d.id = e.department_id;
++------------------+---------+
+| department_name  | name    |
++------------------+---------+
+| HR               | Charlie |
+| HR               | Frank   |
+| HR               | Paul    |
+| HR               | Wendy   |
+| Engineering      | Alice   |
+| Engineering      | Bob     |
+| Engineering      | Jack    |
+| Engineering      | Quincy  |
+| Engineering      | Xander  |
+| Marketing        | Grace   |
+| Marketing        | Olivia  |
+| Marketing        | Victor  |
+| Finance          | David   |
+| Finance          | Emma    |
+| Finance          | Rachel  |
+| Sales            | Hank    |
+| Sales            | Ivy     |
+| Sales            | Zach    |
+| IT               | Karen   |
+| IT               | Laura   |
+| IT               | Tracy   |
+| Customer Support | Mike    |
+| Customer Support | Nina    |
+| Customer Support | Uma     |
+| IT SECURITY      | NULL    |
+| QA               | NULL    |
++------------------+---------+
+26 rows in set (0.001 sec)
+
+MariaDB [employee]> SELECT e.name, d.department_name FROM employees e LEFT JOIN departments d ON e.department_id = d.id;
++---------+------------------+
+| name    | department_name  |
++---------+------------------+
+| Alice   | Engineering      |
+| Bob     | Engineering      |
+| Charlie | HR               |
+| David   | Finance          |
+| Emma    | Finance          |
+| Frank   | HR               |
+| Grace   | Marketing        |
+| Hank    | Sales            |
+| Ivy     | Sales            |
+| Jack    | Engineering      |
+| Karen   | IT               |
+| Laura   | IT               |
+| Mike    | Customer Support |
+| Nina    | Customer Support |
+| Olivia  | Marketing        |
+| Paul    | HR               |
+| Quincy  | Engineering      |
+| Rachel  | Finance          |
+| Steve   | NULL             |
+| Tracy   | IT               |
+| Uma     | Customer Support |
+| Victor  | Marketing        |
+| Wendy   | HR               |
+| Xander  | Engineering      |
+| Yvonne  | NULL             |
+| Zach    | Sales            |
++---------+------------------+
+26 rows in set (0.001 sec)
+
+MariaDB [employee]> SELECT name, salary FROM employees ORDER BY salary DESC LIMIT 1;
++------+----------+
+| name | salary   |
++------+----------+
+| Emma | 90000.00 |
++------+----------+
+1 row in set (0.007 sec)
+
+MariaDB [employee]> SELECT e.name, d.department_name, e.salary FROM employees e LEFT JOIN departments d ON e.dartment_id = d.id ORDER BY e.salary DESC LIMIT 1;
+ERROR 1054 (42S22): Unknown column 'e.dartment_id' in 'ON'
+MariaDB [employee]> SELECT e.name, d.department_name, e.salary FROM employees e LEFT JOIN departments d ON e.department_id = d.id ORDER BY e.salary DESC LIMIT 1;
++------+-----------------+----------+
+| name | department_name | salary   |
++------+-----------------+----------+
+| Emma | Finance         | 90000.00 |
++------+-----------------+----------+
+1 row in set (0.002 sec)
+
+MariaDB [employee]>
