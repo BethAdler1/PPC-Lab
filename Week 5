@@ -200,3 +200,265 @@ MariaDB [employee]> SELECT d.department_name AS Department, e.name AS Manager FR
 +------------------+----------+
 12 rows in set (0.004 sec)
 Q3: List the department each person works in
+MariaDB [employee]> SELECT e.name AS employee, d.department_name AS Department FROM employees e LEFT JOIN departments d ON e.department_id = d.id;
++-----------+------------------+
+| employee  | Department       |
++-----------+------------------+
+| James     | Assembly         |
+| Maria     | Quality Control  |
+| Robert    | Machining        |
+| Emma      | Logistics        |
+| Liam      | Maintenance      |
+| Olivia    | R&D              |
+| Noah      | Procurement      |
+| Ava       | Health & Safety  |
+| William   | Packaging        |
+| Sophia    | Inventory        |
+| Ethan     | Welding          |
+| Isabella  | Plant Management |
+| Charlotte | Machining        |
+| Ella      | Health & Safety  |
+| Scarlett  | Health & Safety  |
+| Ava       | Procurement      |
+| Scarlett  | R&D              |
+| Charlotte | Inventory        |
+| Evelyn    | Machining        |
+| Mia       | NULL             |
+| Ava       | R&D              |
+| Ella      | Procurement      |
+| Logan     | Health & Safety  |
+| Evelyn    | R&D              |
+| Scarlett  | Assembly         |
+| Zoe       | R&D              |
+| Mia       | Plant Management |
+| Grace     | Procurement      |
+| Olivia    | Assembly         |
+| Scarlett  | Quality Control  |
+| Mia       | Plant Management |
+| Emma      | Assembly         |
+| Ethan     | Assembly         |
+| Logan     | Health & Safety  |
+| Abigail   | Plant Management |
+| Aiden     | Welding          |
+| Ava       | NULL             |
+| Charlotte | Quality Control  |
+| Mateo     | Machining        |
+| Charlotte | Machining        |
+| Jackson   | Packaging        |
+| Evelyn    | Quality Control  |
+| Joseph    | Welding          |
+| Amelia    | Plant Management |
+| Elijah    | Welding          |
+| Grace     | Plant Management |
+| Olivia    | Packaging        |
+| Aiden     | Logistics        |
+| Mason     | Quality Control  |
+| Ava       | Quality Control  |
+| Ava       | Welding          |
+| Ava       | Inventory        |
+| Elijah    | Maintenance      |
+| Sophia    | R&D              |
+| Joseph    | Health & Safety  |
+| Oliver    | NULL             |
+| Omar      | NULL             |
+| Mia       | Packaging        |
+| Zoe       | Plant Management |
+| Jackson   | Maintenance      |
+| Amelia    | Welding          |
+| Ella      | Welding          |
+| Evelyn    | Inventory        |
+| Grace     | Health & Safety  |
+| Isabella  | Inventory        |
+| Scarlett  | Welding          |
+| Joseph    | Health & Safety  |
+| James     | R&D              |
+| Mason     | Logistics        |
+| Amelia    | Logistics        |
+| Sophia    | Quality Control  |
+| Mateo     | Assembly         |
+| Aiden     | NULL             |
+| Amelia    | Logistics        |
+| Lucas     | Welding          |
+| Scarlett  | Assembly         |
+| Aiden     | Assembly         |
+| Ava       | Welding          |
+| Isabella  | Plant Management |
+| Sophia    | Packaging        |
+| Ella      | Packaging        |
+| Noah      | Inventory        |
+| Isabella  | R&D              |
+| James     | Inventory        |
+| David     | Maintenance      |
+| Mia       | Maintenance      |
+| Noah      | Quality Control  |
+| Olivia    | NULL             |
+| Harper    | Logistics        |
+| Sophia    | Procurement      |
+| Emma      | Health & Safety  |
+| Grace     | Welding          |
+| Aiden     | Assembly         |
+| Mateo     | Packaging        |
+| Oliver    | Procurement      |
+| Ava       | Maintenance      |
+| Elijah    | Procurement      |
+| Abigail   | Quality Control  |
+| Ethan     | Plant Management |
+| Zoe       | Health & Safety  |
+| Aiden     | Assembly         |
+| Joseph    | Procurement      |
+| Lucas     | Plant Management |
+| Noah      | Inventory        |
+| Zoe       | Machining        |
+| Lucas     | Procurement      |
+| Logan     | NULL             |
+| Emma      | Welding          |
+| Logan     | Health & Safety  |
+| Lucas     | Plant Management |
+| Sebastian | Logistics        |
+| Joseph    | R&D              |
+| Evelyn    | Health & Safety  |
+| Mia       | R&D              |
+| Emma      | Assembly         |
+| Ella      | Plant Management |
+| Scarlett  | Welding          |
+| Ethan     | Assembly         |
+| Liam      | R&D              |
+| Olivia    | R&D              |
+| Liam      | Inventory        |
+| Mason     | Plant Management |
+| Jackson   | Machining        |
+| Isabella  | Packaging        |
+| Logan     | Assembly         |
+| Lucas     | Inventory        |
+| Mateo     | NULL             |
+| Abigail   | Logistics        |
+| David     | Machining        |
+| Ella      | Inventory        |
+| David     | Procurement      |
+| Charlotte | Plant Management |
+| Sophia    | Packaging        |
+| Harper    | Procurement      |
+| Mateo     | Maintenance      |
+| Mateo     | Machining        |
+| Lucas     | Health & Safety  |
+| Evelyn    | Procurement      |
+| David     | Health & Safety  |
+| Isabella  | Machining        |
+| Ava       | Health & Safety  |
+| Liam      | Logistics        |
+| Zoe       | Health & Safety  |
+| Sherif    | NULL             |
+| Isabella  | Health & Safety  |
+| Olivia    | Packaging        |
+| Sebastian | NULL             |
+| Jackson   | R&D              |
+| Abigail   | Logistics        |
+| Amelia    | Logistics        |
+| Joseph    | Welding          |
+| Logan     | R&D              |
+| Sophia    | Health & Safety  |
+| Elijah    | Quality Control  |
+| Logan     | Health & Safety  |
+| Ethan     | Inventory        |
+| Jackson   | Maintenance      |
+| Sophia    | Welding          |
+| Charlotte | Inventory        |
+| Mateo     | Maintenance      |
+| Lucas     | Machining        |
+| Ella      | Welding          |
+| James     | Health & Safety  |
+| Oliver    | Health & Safety  |
+| Mateo     | Inventory        |
+| Mia       | Health & Safety  |
+| Ava       | NULL             |
+| Oliver    | Assembly         |
+| Emma      | Packaging        |
+| Aiden     | Procurement      |
+| Grace     | Machining        |
+| Lucas     | Maintenance      |
+| Grace     | Quality Control  |
+| Jackson   | Logistics        |
+| Abigail   | Quality Control  |
+| Jackson   | Health & Safety  |
+| Noah      | Health & Safety  |
+| Charlotte | Plant Management |
+| Mia       | Inventory        |
+| Isabella  | Machining        |
+| Joseph    | Logistics        |
+| Emma      | Welding          |
+| Liam      | Inventory        |
+| Mason     | R&D              |
+| Lucas     | Assembly         |
+| Grace     | Plant Management |
+| Charlotte | NULL             |
+| David     | Assembly         |
++-----------+------------------+
+188 rows in set (0.028 sec)
+Q4: Find Employees who have no manager
+MariaDB [employee]> SELECT name FROM employees WHERE department_id IS NULL;
++-----------+
+| name      |
++-----------+
+| Mia       |
+| Ava       |
+| Oliver    |
+| Omar      |
+| Aiden     |
+| Olivia    |
+| Logan     |
+| Mateo     |
+| Sherif    |
+| Sebastian |
+| Ava       |
+| Charlotte |
++-----------+
+12 rows in set (0.003 sec)
+
+Q5:Show count of employees in each dep
+MariaDB [employee]> SELECT d.department_name, COUNT(e.id) AS employee_Count FROM employees e LEFT JOIN departments d ON e.department_id = d.id GROUP BY d.department_name;
++------------------+----------------+
+| department_name  | employee_Count |
++------------------+----------------+
+| NULL             |             12 |
+| Assembly         |             16 |
+| Health & Safety  |             24 |
+| Inventory        |             16 |
+| Logistics        |             13 |
+| Machining        |             13 |
+| Maintenance      |             10 |
+| Packaging        |             11 |
+| Plant Management |             16 |
+| Procurement      |             13 |
+| Quality Control  |             12 |
+| R&D              |             15 |
+| Welding          |             17 |
++------------------+----------------+
+13 rows in set (0.012 sec)
+Q6:lIST NAME, SALARY, AND DEP NAME.
+MariaDB [employee]> SELECT e.name, e.salary, d.department_name FROM employees e JOIN departments d ON e.department_id = d.id WHERE e.manager_id IS NULL;
++----------+--------+------------------+
+| name     | salary | department_name  |
++----------+--------+------------------+
+| James    |  95000 | Assembly         |
+| Maria    |  92000 | Quality Control  |
+| Robert   |  88000 | Machining        |
+| Emma     |  91000 | Logistics        |
+| Liam     |  85000 | Maintenance      |
+| Olivia   | 110000 | R&D              |
+| Noah     |  78000 | Procurement      |
+| Ava      |  82000 | Health & Safety  |
+| William  |  75000 | Packaging        |
+| Sophia   |  84000 | Inventory        |
+| Ethan    |  89000 | Welding          |
+| Isabella | 125000 | Plant Management |
++----------+--------+------------------+
+12 rows in set (0.002 sec)
+Q7: List employees whose salaries are higher than their manager's
+MariaDB [employee]> SELECT e.name AS Employee, e.salary AS E_Salary, m.name AS Manager, m.salary AS M_salary FROM employees e JOIN employees m ON e.manager_id = m.id WHERE e.salary > m.salary;
++----------+----------+---------+----------+
+| Employee | E_Salary | Manager | M_salary |
++----------+----------+---------+----------+
+| Ella     |    97000 | James   |    95000 |
+| Scarlett |    77000 | William |    75000 |
++----------+----------+---------+----------+
+2 rows in set (0.002 sec)
