@@ -55,7 +55,7 @@ MariaDB [employee]> SELECT e.name AS Employees, m.name AS Managers FROM employee
 | Emma      | Ella      |
 | Olivia    | Evelyn    |
 | William   | Grace     |
-| Robert    | Isabella  |
+| Robert    | Isabella  | 
 | Noah      | Scarlett  |
 | James     | Joseph    |
 | Ethan     | James     |
