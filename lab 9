@@ -1,0 +1,139 @@
+Mariadb WORK:
+//create Database
+MariaDB [(none)]> CREATE DATABASE labwork;
+Query OK, 1 row affected (0.010 sec)
+MariaDB [(none)]> USE labwork;
+Database changed
+//Create the tables
+MariaDB [labwork]> CREATE TABLE salesman(salesman_id INT PRIMARY KEY, name VARCHAR(50), city VARCHAR(50), commission DECIMAL(4,2));
+Query OK, 0 rows affected (0.049 sec)
+MariaDB [labwork]> CREATE TABLE customer( customer_id INT PRIMARY KEY, customer_name VARCHAR(50),city VARCHAR(50), grade INT, salesman_id INT,FOREIGN KEY (salesman_id) REFERENCES salesman(salesman_id));
+Query OK, 0 rows affected (0.026 sec)
+MariaDB [labwork]> CREATE TABLE orders(order_no INT PRIMARY KEY, purchase_amt DECIMAL(10,2),order_date DATE, customer_id INT, FOREIGN KEY (customer_id) REFERENCES customer( customer_id),salesman_id INT, FOREIGN KEY (salesman_id) REFERENCES salesman(salesman_id));
+Query OK, 0 rows affected (0.029 sec)
+
+//Insert Play Data
+MariaDB [labwork]> INSERT INTO salesman (salesman_id, name, city, commission) VALUES
+    -> (5001, 'James Hoog', 'New York', 0.15),
+    -> (5002, 'Nail Knite', 'Paris', 0.13),
+    -> (5005, 'Pit Alex', 'London', 0.11),
+    -> (5006, 'Mc Lyon', 'Paris', 0.14),
+    -> (5007, 'Paul Adam', 'Rome', 0.13),
+    -> (5003, 'Lauson Hen', 'San Jose', 0.12);
+Query OK, 6 rows affected (0.009 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+MariaDB [labwork]> INSERT INTO customer (customer_id, customer_name, city, grade, salesman_id) VALUES
+    -> (3002, 'Nick Rimando', 'New York', 100, 5001),
+    -> (3007, 'Brad Davis', 'New York', 200, 5001),
+    -> (3005, 'Graham Zusi', 'California', 200, 5002),
+    -> (3008, 'Julian Green', 'London', 300, 5002),
+    -> (3004, 'Fabian Johnson', 'Paris', 300, 5006),
+    -> (3009, 'Geoff Cameron', 'Berlin', 100, 5003),
+    -> (3003, 'Jozy Altidor', 'Moscow', 200, 5007),
+    -> (3001, 'Brad Guzan', 'London', 100, 5005);
+Query OK, 8 rows affected (0.005 sec)
+Records: 8  Duplicates: 0  Warnings: 0
+
+MariaDB [labwork]> INSERT INTO orders (order_no, purchase_amt, order_date, customer_id, salesman_id) VALUES
+    -> (70001, 150.50, '2026-03-05', 3005, 5002),
+    -> (70009, 270.65, '2026-03-10', 3001, 5005),
+    -> (70002, 65.26, '2026-03-11', 3002, 5001),
+    -> (70004, 110.50, '2026-03-12', 3009, 5003),
+    -> (70007, 948.50, '2026-03-14', 3005, 5002),
+    -> (70005, 2400.60, '2026-03-15', 3007, 5001),
+    -> (70008, 5760.00, '2026-03-16', 3002, 5001),
+    -> (70010, 1983.43, '2026-03-16', 3004, 5006),
+    -> (70003, 2480.40, '2026-03-17', 3009, 5003),
+    -> (70012, 250.45, '2026-03-17', 3008, 5002);
+Query OK, 10 rows affected (0.006 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+JAVA FILES:
+DBConnection FILE:
+import java.sql.*;
+import java.util.ArrayList;
+
+public class DBConnection{
+    public static void main(String[] args) {    //GET USER PASS DB
+        if (args.length < 3) {
+            System.out.println("Usage: java DBConnection <user> <pass> <db_name>");
+            return;
+        }
+        String user = args[0];
+        String pass = args[1];
+        String url = "jdbc:mariadb://localhost:3306/" + args[2];  //TURN INTO STRING
+
+        ArrayList<Sales> salesList = new ArrayList<>(); //ARRAY LIST HOLDING SALES OBJECTS
+
+        String query = "SELECT o.order_no, c.customer_name, c.city, s.name, o.purchase_amt, s.commission " +
+                       "FROM orders o " +
+                       "JOIN customer c ON o.customer_id = c.customer_id " +
+                       "JOIN salesman s ON o.salesman_id = s.salesman_id";
+
+        try (Connection conn = DriverManager.getConnection(url, user, pass);
+             Statement stmt = conn.createStatement();
+             
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                Sales sale = new Sales(
+                    rs.getInt("order_no"),
+                    rs.getString("customer_name"),
+                    rs.getString("city"),
+                    rs.getString("name"),
+                    rs.getDouble("purchase_amt"),
+                    rs.getDouble("commission")
+                );
+                salesList.add(sale);
+            }
+
+            // Verify data
+            salesList.forEach(System.out::println);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+SALES CLASS FILE:
+public class Sales {        // Variables
+    int orderNumber;
+    String customerName;
+    String customerCity;
+    String salesmanName;
+    double amount;
+    double commissionAmount;
+
+    public Sales(int orderNumber, String customerName, String customerCity,     //Constructor
+                 String salesmanName, double amount, double commission) {
+        this.orderNumber = orderNumber;
+        this.customerName = customerName;
+        this.customerCity = customerCity;
+        this.salesmanName = salesmanName;
+        this.amount = amount;
+        this.commissionAmount = amount * commission;
+    }
+
+    @Override
+    public String toString() {                                                            //Visual Representation
+        return String.format("Order #%d | Customer: %s | Salesman: %s | Comm: $%.2f", 
+                orderNumber, customerName, salesmanName, commissionAmount);
+    }
+}
+
+TERMINAL OUTPUT:
+RAN: badle@Beth-Dell7420 MINGW64 ~/OneDrive/PPC/Assign_9
+$ java -cp ".;mariadb-java-client-3.5.7.jar" DBConnection bethany spring26ppc labwork
+
+OUTPUT:
+Order #70002 | Customer: Nick Rimando | Salesman: James Hoog | Comm: $9.79
+Order #70005 | Customer: Brad Davis | Salesman: James Hoog | Comm: $360.09
+Order #70008 | Customer: Nick Rimando | Salesman: James Hoog | Comm: $864.00
+Order #70001 | Customer: Graham Zusi | Salesman: Nail Knite | Comm: $19.57
+Order #70007 | Customer: Graham Zusi | Salesman: Nail Knite | Comm: $123.31
+Order #70012 | Customer: Julian Green | Salesman: Nail Knite | Comm: $32.56
+Order #70003 | Customer: Geoff Cameron | Salesman: Lauson Hen | Comm: $297.65
+Order #70004 | Customer: Geoff Cameron | Salesman: Lauson Hen | Comm: $13.26
+Order #70009 | Customer: Brad Guzan | Salesman: Pit Alex | Comm: $29.77
+Order #70010 | Customer: Fabian Johnson | Salesman: Mc Lyon | Comm: $277.68
+
