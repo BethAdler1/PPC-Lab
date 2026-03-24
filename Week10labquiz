@@ -1,0 +1,127 @@
+CODE:
+import java.util.Arrays;
+import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/** The goal of this practice is not to "get the answer" through AI or some other means, but for you to think through the questions and
+* come up with a strategy. You can decide not to do it at your own cost.
+*/
+
+/**
+* In the following, write code to achieve what's asked. You don't need to but if you want to very the accuracy of your code,
+* include statements to print the result.
+*/
+
+/** Submit to the TA, and he will assign you a grade based on a few selected responses.  */
+
+
+
+
+
+public class Week10_labs
+{
+    public static void main(String[] args)
+	{
+        List<String> fruit = Arrays.asList("cherry","banana","berry","apple","cherry","kiwi","fig","date","lemon","honeydew","cherry","elderberry","apple","banana","grape");
+
+		// Collect elements into a Set
+        Set <String> uniqueFruit = fruit.stream().collect(Collectors.toSet());
+        System.out.println("Unique fruit: " + uniqueFruit + "\n");
+
+        // Collect the fruit into groups based on their first character
+        Map<Character, List<String>> fruitByFirstChar = fruit.stream().collect(Collectors.groupingBy(s -> s.charAt(0)));
+        System.out.println("Fruit grouped by first character: " + fruitByFirstChar+ "\n");
+
+		// Group fruit by the length of the name
+        Map<Integer, List<String>> fruitByLength = fruit.stream().collect(Collectors.groupingBy(String::length));
+        System.out.println("Fruit grouped by length: " + fruitByLength + "\n" );
+
+
+		//Collect the fruit that has erry in it
+        List<String> fruitWithErry = fruit.stream().filter(s -> s.contains("erry")).collect(Collectors.toList());
+        System.out.println("Fruit with 'erry': " + fruitWithErry+ "\n");
+
+		//Create a partition of fruit based on if it contains erry
+        Map<Boolean, List<String>> partitionedFruit = fruit.stream().collect(Collectors.partitioningBy(s -> s.contains("erry")));
+        System.out.println("Partitioned fruit based on if it contains 'erry': " + partitionedFruit+ "\n");
+		
+        //collect the fruit that has 5 or less symbols
+        List<String> smallFruit = fruit.stream().filter(s -> s.length() <= 5).collect(Collectors.toList());
+        System.out.println("Small fruit: " + smallFruit+ "\n");
+		
+        //find the total number of symbols in all the fruit stored
+        int totalSymbols = fruit.stream().collect(Collectors.summingInt(String::length));
+        System.out.println("Total number of symbols in all fruit: " + totalSymbols+ "\n");
+
+		List<Integer> data = Arrays.asList(87, 23, 45, 100, 6, 78, 92, 44, 13, 56, 34, 99, 82, 19, 1012, 78, 45, 90, 23, 56, 78, 100, 3, 43, 67, 89, 21, 34, 10);
+        
+
+        // Partition data based on if >=50
+        Map<Boolean, List<Integer>> partitionedData = data.stream().collect(Collectors.partitioningBy(i-> i >= 50));
+        System.out.println("Data partitioned by >=50: " + partitionedData+ "\n");
+
+		//divide data into groups based on the remainder when divided by 7
+        System.out.println("Data by remainder when divided by 7:");
+        Map<Integer, List<Integer>> dataByRemainder = data.stream().collect(Collectors.groupingBy(i -> i % 7));//group by the remainder when divided by 7
+        System.out.println(dataByRemainder+ "\n");
+
+		//find the sum of the data
+        int sum = data.stream().collect(Collectors.summingInt(Integer::intValue));//summingInt collector to sum the integers
+        System.out.println("Sum of data: " + sum+   "\n");
+
+
+		//collect the unique values
+        Set<Integer> uniqueData = data.stream().collect(Collectors.toSet());//collect to a set to get unique values
+        System.out.println("Unique data: " + uniqueData+ "\n");
+
+        //compute the cube of each values
+        List<Integer> cubes = data.stream().map(i -> i * i * i).collect(Collectors.toList());//map to cube each value, then collect to list
+        System.out.println("Cubes of data: " + cubes+ "\n");
+
+		//find the sum of the cubes of each value
+        int sumOfCubes = cubes.stream().collect(Collectors.summingInt(Integer::intValue));//sum the cubes using summingInt collector
+        System.out.println("Sum of cubes: " + sumOfCubes+ "\n");
+
+		//increase the value of each element by 5
+        List<Integer> increasedData = data.stream().map(i -> i + 5).collect(Collectors.toList());//map to increase each value by 5, then collect to list
+        System.out.println("Data increased by 5: " + increasedData+ "\n");
+
+		//compute the cube of the even values
+        List<Integer> evenCubes = data.stream().filter(i -> i % 2 == 0).map(i -> i * i * i).collect(Collectors.toList());//filter for even values, then map to cube, then collect to list
+        System.out.println("Cubes of even values: " + evenCubes+ "\n");
+    
+
+   }
+}
+Output:
+Unique fruit: [banana, date, cherry, apple, honeydew, berry, kiwi, lemon, fig, grape, elderberry]
+
+Fruit grouped by first character: {a=[apple, apple], b=[banana, berry, banana], c=[cherry, cherry, cherry], d=[date], e=[elderberry], f=[fig], g=[grape], h=[honeydew], k=[kiwi], l=[lemon]}
+
+Fruit grouped by length: {3=[fig], 4=[kiwi, date], 5=[berry, apple, lemon, apple, grape], 6=[cherry, banana, cherry, cherry, banana], 8=[honeydew], 10=[elderberry]}
+
+Fruit with 'erry': [cherry, berry, cherry, cherry, elderberry]
+
+Partitioned fruit based on if it contains 'erry': {false=[banana, apple, kiwi, fig, date, lemon, honeydew, apple, banana, grape], true=[cherry, berry, cherry, cherry, elderberry]}
+
+Small fruit: [berry, apple, kiwi, fig, date, lemon, apple, grape]
+
+Total number of symbols in all fruit: 84
+
+Data partitioned by >=50: {false=[23, 45, 6, 44, 13, 34, 19, 45, 23, 3, 43, 21, 34, 10], true=[87, 100, 78, 92, 56, 99, 82, 1012, 78, 90, 56, 78, 100, 67, 89]}
+
+Data by remainder when divided by 7:
+{0=[56, 56, 21], 1=[78, 92, 99, 78, 78, 43], 2=[23, 100, 44, 23, 100], 3=[87, 45, 45, 3, 10], 4=[1012, 67], 5=[82, 19, 89], 6=[6, 13, 34, 90, 34]}
+
+Sum of data: 2527
+
+Unique data: [34, 99, 3, 67, 100, 6, 10, 43, 44, 45, 13, 78, 82, 19, 1012, 21, 87, 23, 56, 89, 90, 92]
+
+Cubes of data: [658503, 12167, 91125, 1000000, 216, 474552, 778688, 85184, 2197, 175616, 39304, 970299, 551368, 6859, 1036433728, 474552, 91125, 729000, 12167, 175616, 474552, 1000000, 27, 79507, 300763, 704969, 9261, 39304, 1000]
+
+Sum of cubes: 1045371649
+
+Data increased by 5: [92, 28, 50, 105, 11, 83, 97, 49, 18, 61, 39, 104, 87, 24, 1017, 83, 50, 95, 28, 61, 83, 105, 8, 48, 72, 94, 26, 39, 15]
+
+Cubes of even values: [1000000, 216, 474552, 778688, 85184, 175616, 39304, 551368, 1036433728, 474552, 729000, 175616, 474552, 1000000, 39304, 1000]
