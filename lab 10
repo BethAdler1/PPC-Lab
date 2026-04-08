@@ -1,0 +1,233 @@
+MARIADB:
+MariaDB [labwork]> CREATE or REPLACE VIEW CustomerView AS Select c.customer_name as Name, c.city as City, SUM(o.purchase_amt) AS TotalAmount FROM customer c JOIN orders o on c.customer_id =o.customer_id GROUP BY c.customer_id, c.customer_name, c.city;
+Query OK, 0 rows affected (0.015 sec)
+
+MariaDB [labwork]> CREATE or REPLACE VIEW SalesmanView AS Select s.name as Name, s.city as City, SUM(o.purchase_amt) AS TotalAmount FROM salesman s JOIN orders o on s.salesman_id =o.salesman_id GROUP BY s.salesman_id, s.name, s.city;
+Query OK, 0 rows affected (0.015 sec)
+MariaDB [labwork]> DESCRIBE CustomerView;
++-------------+--------------+------+-----+---------+-------+
+| Field       | Type         | Null | Key | Default | Extra |
++-------------+--------------+------+-----+---------+-------+
+| Name        | varchar(200) | YES  |     | NULL    |       |
+| City        | varchar(50)  | YES  |     | NULL    |       |
+| TotalAmount | double(19,2) | YES  |     | NULL    |       |
++-------------+--------------+------+-----+---------+-------+
+3 rows in set (0.013 sec)
+
+MariaDB [labwork]> DESCRIBE SalesPersonView;
+ERROR 1146 (42S02): Table 'labwork.salespersonview' doesn't exist
+MariaDB [labwork]> DESCRIBE SalesmanView;
++-------------+--------------+------+-----+---------+-------+
+| Field       | Type         | Null | Key | Default | Extra |
++-------------+--------------+------+-----+---------+-------+
+| Name        | varchar(200) | YES  |     | NULL    |       |
+| City        | varchar(50)  | YES  |     | NULL    |       |
+| TotalAmount | double(19,2) | YES  |     | NULL    |       |
++-------------+--------------+------+-----+---------+-------+
+3 rows in set (0.006 sec)
+
+CLASES:
+public class Customer {
+    private String name;
+    private String city;
+    private Double total_spent;
+
+    public Customer(String name, String city, Double total_spent) {
+        this.name = name;
+        this.city = city;
+        this.total_spent = total_spent;
+    }
+    public Double getTotalSpent() {
+        return total_spent;
+    }
+    public String getName() {
+        return name;
+    }
+    public String getCity() {
+        return city;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setCity(String city) {
+        this.city = city;
+    }
+    public void setTotalSpent(Double total_spent) {
+        this.total_spent = total_spent;
+    }
+    @Override
+    public String toString(){
+        return "Customer{name='" + name + "', city='" + city + "', total_spent=" + total_spent + "}";
+    }
+}
+
+public class SalesPerson {
+    private String name;
+    private String city;
+    private Double totalSales;
+
+    public SalesPerson(String name, String city, Double total_sales) {
+        this.name = name;
+        this.city = city;
+        this.totalSales = total_sales;
+    }
+    @Override
+    public String toString(){
+        return "SalesPerson{name='" + name + "', city='" + city + "', totalSales=" + totalSales + "}";
+    }
+    public String getName() {
+        return name;
+    }
+    public String getCity() {
+        return city;
+    }
+    public Double getTotalSales() {
+        return totalSales;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setCity(String city) {
+        this.city = city;
+    }
+    public void setTotalSales(Double total_sales) {
+        this.totalSales = total_sales;
+    }
+
+}
+
+public class RetrieveData {
+    public static void main(String[] args) {
+        if (args.length < 3) {
+            System.out.println("Usage: java RetrieveData <db_url> <username> <password>");
+            return;
+        }
+        //get database connection parameters from command line arguments
+        String dbUrl = args[0];
+        String user = args[1];
+        String pass = args[2];
+
+        List<Customer> customerList = new ArrayList<>();
+        List<SalesPerson> salesPersonList = new ArrayList<>();
+ 
+        Function <ResultSet, Customer> customerMapper = rs -> {
+            try{
+                return new Customer(
+                rs.getString("Name"), 
+                rs.getString("City"), 
+                rs.getDouble("TotalAmount"));
+            } catch (SQLException e) {
+                throw new RuntimeException("Error mapping ResultSet to Customer", e);
+            }
+        };
+
+        Function <ResultSet, SalesPerson> salesPersonMapper = rs -> {
+            try{
+                return new SalesPerson(
+                rs.getString("Name"), 
+                rs.getString("City"), 
+                rs.getDouble("TotalAmount"));
+            } catch (SQLException e) {
+                throw new RuntimeException("Error mapping ResultSet to SalesPerson", e);
+            }
+        };
+
+           
+        //connect to the Maria DB and retrieve data from the views, mapping them to Customer and SalesPerson objects
+        try (Connection conn = DriverManager.getConnection(dbUrl, user, pass)){
+
+            Statement stmtC = conn.createStatement();
+            ResultSet rsC = stmtC.executeQuery("SELECT* FROM CustomerView");
+                while (rsC.next()) {
+                    customerList.add(customerMapper.apply(rsC));
+                }
+
+            Statement stmtSP = conn.createStatement();
+            ResultSet rsSP = stmtSP.executeQuery("SELECT* FROM SalesmanView");
+                while (rsSP.next()) {
+                    salesPersonList.add(salesPersonMapper.apply(rsSP));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                }
+        //-----Stream operations
+         //print 10 customers and 10 Salespeople
+        System.out.println("First 10 Customers:");
+        customerList.stream().limit(10).forEach(System.out::println);
+            
+        System.out.println("\nFirst 10 SalesPeople:");
+        salesPersonList.stream().limit(10).forEach(System.out::println);
+            
+        //Use Collectors.averagingDouble() to get the average a Customer spent
+        double avgSpent = customerList.stream()
+        .collect(Collectors.averagingDouble(Customer::getTotalSpent));
+        System.out.println("\nAverage amount spent by Customers: " + avgSpent);
+
+        //Create a list of high spenders, those who spent more than the avg, ordered in decreasing amounts spent. Print the top 10 high spenders.
+         List<Customer> highSpenders = customerList.stream()
+         .filter(c -> c.getTotalSpent() > avgSpent)
+         .sorted(Comparator.comparingDouble(Customer::getTotalSpent)
+         .reversed())
+         .limit(10)
+         .collect(Collectors.toList());
+
+         System.out.println("\nTop 10 High Spenders:");
+        highSpenders.forEach(System.out::println);
+
+        //What city has the top 5 spenders?
+        List<String> top5Cities = highSpenders.stream()
+        .limit(5)
+        .map(Customer::getCity)
+        .distinct()
+        .collect(Collectors.toList());
+
+        System.out.println("\nCities with Top 5 Spenders:");
+        top5Cities.forEach(System.out::println);
+            }
+        }
+OUTPUT:
+ava -cp ".;mariadb-java-client-3.5.8.jar" RetrieveData "jdbc:mariadb://localhost:3306/labwork" "bethany" "spring26ppc"
+First 10 Customers:
+Customer{name='Thomas Johnson', city='Rome', total_spent=1250.75}
+Customer{name='William Jones', city='Sydney', total_spent=2140.2}
+Customer{name='Robert Martin', city='Toronto', total_spent=3490.1}
+Customer{name='Jessica Martinez', city='Tokyo', total_spent=2320.5}
+Customer{name='David Jackson', city='Tokyo', total_spent=3420.65}
+Customer{name='Jessica Gonzalez', city='Madrid', total_spent=4500.22}
+Customer{name='Jennifer Johnson', city='San Jose', total_spent=3360.4}
+Customer{name='Linda Williams', city='Tokyo', total_spent=3350.25}
+Customer{name='William Miller', city='Toronto', total_spent=2873.79}
+Customer{name='Jennifer Martin', city='Berlin', total_spent=2410.9}
+
+First 10 SalesPeople:
+SalesPerson{name='Arjun Mehta', city='Sydney', totalSales=17854.52}
+SalesPerson{name='Sophie Dubois', city='London', totalSales=12030.48}
+SalesPerson{name='Liam O?Connor', city='Paris', totalSales=22418.13}
+SalesPerson{name='Isabella Rossi', city='Paris', totalSales=22694.97}
+SalesPerson{name='Kenji Tanaka', city='Berlin', totalSales=18688.62}
+SalesPerson{name='Hans Müller', city='Berlin', totalSales=18920.19}
+SalesPerson{name='Elena Ricci', city='San Jose', totalSales=24878.65}
+SalesPerson{name='Marcus Aurelius', city='New York', totalSales=14910.92}
+SalesPerson{name='Sarah Jenkins', city='London', totalSales=12029.98}
+SalesPerson{name='Hiroshi Sato', city='Paris', totalSales=33089.87}
+
+Average amount spent by Customers: 2381.574468085106
+
+Top 10 High Spenders:
+Customer{name='David Jackson', city='Tokyo', total_spent=7590.99}
+Customer{name='Elizabeth Thomas', city='Rome', total_spent=6914.17}
+Customer{name='Richard Williams', city='Madrid', total_spent=6166.72}
+Customer{name='Jennifer Moore', city='Berlin', total_spent=5718.18}
+Customer{name='John Moore', city='Tokyo', total_spent=5669.15}
+Customer{name='Thomas Martinez', city='Toronto', total_spent=5592.74}
+Customer{name='William Martin', city='London', total_spent=4961.27}
+Customer{name='Michael Garcia', city='New York', total_spent=4890.3}
+Customer{name='Susan Jackson', city='Madrid', total_spent=4826.27}
+Customer{name='John Williams', city='Berlin', total_spent=4737.88}
+
+Cities with Top 5 Spenders:
+Tokyo
+Rome
+Madrid
+Berlin
+Tokyo
