@@ -1,0 +1,143 @@
+OUTPUT:
+                                          javac -cp ".;mariadb-java-client-3.5.8.jar" RetrieveData.java                
+PS C:\Users\badle\OneDrive\PPC\Assign_10> java -cp ".;mariadb-java-client-3.5.8.jar" RetrieveData "jdbc:mariadb://localhost:3306/labwork" "bethany" "spring26ppc"
+------Salesperson Total Commissions -----
+Name                 | TotalCommissions     |
+------------------------------------------
+Arjun Mehta          | $2,142.54
+Sophie Dubois        | $1,804.57
+Liam O?Connor        | $2,914.36
+Isabella Rossi       | $2,496.45
+Kenji Tanaka         | $2,242.63
+Hans Müller          | $2,270.42
+Elena Ricci          | $2,736.65
+Marcus Aurelius      | $1,789.31
+Sarah Jenkins        | $1,323.30
+Hiroshi Sato         | $3,970.78
+Fatima Zahra         | $1,056.96
+Mateo Garcia         | $791.33
+Chloe Lefebvre       | $1,780.02
+Lars Nielsen         | $1,564.48
+Priya Sharma         | $639.97
+Diego Torres         | $2,287.93
+Amina Abadi          | $2,916.58
+Oliver Twist         | $1,690.62
+Yuki Tanaka          | $2,652.75
+Lucas Meyer          | $1,752.32
+------------------------------------------
+
+--- Salesperson Total Earnings/Sales ---
+Name                 | TotalSales
+------------------------------------------
+Arjun Mehta          | $17,854.52
+Sophie Dubois        | $12,030.48
+Liam O?Connor        | $22,418.13
+Isabella Rossi       | $22,694.97
+Kenji Tanaka         | $18,688.62
+Hans Müller          | $18,920.19
+Elena Ricci          | $24,878.65
+Marcus Aurelius      | $14,910.92
+Sarah Jenkins        | $12,029.98
+Hiroshi Sato         | $33,089.87
+Fatima Zahra         | $8,808.00
+Mateo Garcia         | $7,193.94
+Chloe Lefebvre       | $13,692.45
+Lars Nielsen         | $12,034.45
+Priya Sharma         | $5,817.92
+Diego Torres         | $15,252.85
+Amina Abadi          | $22,435.20
+Oliver Twist         | $13,004.80
+Yuki Tanaka          | $24,115.89
+Lucas Meyer          | $15,930.17
+------------------------------------------
+Classes:
+import java.sql.*;
+import java.util.*;
+import java.util.function.Function;
+
+public class RetrieveData {
+    public static void main(String[] args) {
+        if (args.length < 3) {
+            System.out.println("Usage: java RetrieveData <db_url> <username> <password>");
+            return;
+        }
+        //get database connection parameters from command line arguments
+        String dbUrl = args[0];
+        String user = args[1];
+        String pass = args[2];
+
+        List<SalesPerson> salesPersonList = new ArrayList<>();
+  
+        Function <ResultSet, SalesPerson> salesPersonMapper = rs -> {
+            try{
+                return new SalesPerson(
+                rs.getString("Name"), 
+                rs.getString("City"), 
+                rs.getDouble("totalamount"),
+                rs.getDouble("commission"));
+            } catch (SQLException e) {
+                throw new RuntimeException("Error mapping ResultSet to SalesPerson", e);
+            }
+        };
+
+            Statement stmtSP = conn.createStatement();
+            ResultSet rsSP = stmtSP.executeQuery("SELECT* FROM SalesmanView");
+                while (rsSP.next()) {
+                    salesPersonList.add(salesPersonMapper.apply(rsSP));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                }
+        //-----Stream operations
+        String horizontalRule = "------------------------------------------";
+        //1. Print NAmes and Total Commisions
+        System.out.println("------Salesperson Total Commissions -----");
+        System.out.printf("%-20s | %-20s |%n", "Name", "TotalCommissions");
+        System.out.println(horizontalRule);
+        
+        salesPersonList.stream().forEach(sp->{
+            double earnings = sp.getTotalSales() * sp.getCommissionRate();
+            System.out.printf("%-20s | $%,-20.2f%n", sp.getName(), earnings);
+        });
+        System.out.println(horizontalRule);
+
+        //  Print all salesPersons names and their total earnings
+        System.out.println("\n--- Salesperson Total Earnings/Sales ---");
+        System.out.printf("%-20s | %-15s%n", "Name", "TotalSales");
+        System.out.println(horizontalRule);
+        
+        salesPersonList.stream()
+            .forEach(sp -> System.out.printf("%-20s | $%,-20.2f%n", 
+                sp.getName(), sp.getTotalSales()));
+        System.out.println(horizontalRule);
+
+public class SalesPerson {
+    private String name;
+    private String city;
+    private Double totalSales;
+    private Double commissionRate;
+    public SalesPerson(String name, String city, Double totalSales, Double commissionRate) {
+        this.name = name;
+        this.city = city;
+        this.totalSales = totalSales;
+        this.commissionRate = commissionRate;
+    }
+    @Override
+    public String toString(){
+        return "SalesPerson{name='" + name + "', city='" + city + "', totalSales=" + totalSales + ", commissionRate=" + commissionRate + "}";
+    }
+    public String getName() {
+        return name;
+    }
+    public String getCity() {
+        return city;
+    }
+    public Double getTotalSales() {
+        return totalSales;
+    }
+    public Double getCommissionRate() {
+        return commissionRate;
+    }
+}
+
+
