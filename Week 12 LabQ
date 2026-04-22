@@ -1,0 +1,195 @@
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+// Main execution class
+public class SequentialDataPipeline {
+    public static void main(String[] args) {
+        SharedData sharedData = new SharedData();
+
+        ConnectionClass t1 = new ConnectionClass(sharedData);
+        Process t2 = new Process(sharedData);
+        WriteToFile t3 = new WriteToFile(sharedData, "commissions.csv");
+
+        try {
+            // Start Thread 1 and wait for it to finish
+            t1.start();
+            t1.join(); 
+
+            // Start Thread 2 ONLY after Thread 1 is entirely done
+            t2.start();
+            t2.join();
+
+            // Start Thread 3 ONLY after Thread 2 is entirely done
+            t3.start();
+            t3.join();
+
+            System.out.println("Main thread: Entire pipeline finished successfully.");
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+class SharedData {
+    //raw data from db
+    public List<String[]> rawData = new ArrayList<>();
+    //processed data ready for csv
+    public List<String> processedData = new ArrayList<>();
+}
+
+//Thread 1: Connect to DB and retrieve data
+class ConnectionClass extends Thread {
+    final SharedData data;
+
+    public ConnectionClass(SharedData data) {
+        this.data = data;
+    }
+    
+@Override
+    public void run() {
+        System.out.println("Thread 1 (ConnectionClass): Connecting to database and retrieving data...");
+        String url = "jdbc:mariadb://localhost:3306/labwork"; 
+        String user = "bethany"; 
+        String password = "spring26ppc";
+
+        // Querying salesPersons and their totalCommission
+        String query = 
+        "SELECT name, commission * TotalAmount AS TotalCommission FROM salesmanview GROUP BY name";
+
+        try(Connection conn = DriverManager.getConnection(url, user, password);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query)){
+
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String commission = rs.getString("totalCommission");
+                data.rawData.add(new String[]{name, commission});
+            }
+            System.out.println("Thread 1: Data retrieval complete.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+// Thread 2: Process the retrieved data
+class Process extends Thread {
+    final SharedData data;
+
+    public Process(SharedData data) {
+        this.data = data;
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Thread 2 (Process): Formatting data for CSV...");
+        
+        // Add a header row
+        data.processedData.add("SalesPerson,TotalCommission");
+
+        // Format raw array data into CSV strings
+        for (String[] row : data.rawData) {
+            String formattedRow = row[0] + "," + row[1];
+            data.processedData.add(formattedRow);
+        }
+        
+        System.out.println("Thread 2: Data processing complete.");
+    }
+}
+
+// Thread 3: Write processed data to a CSV file
+class WriteToFile extends Thread {
+    private SharedData data;
+    private String filename;
+
+    public WriteToFile(SharedData data, String filename) {
+        this.data = data;
+        this.filename = filename;
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Thread 3 (WriteToFile): Writing data to " + filename + "...");
+        
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+            for (String line : data.processedData) {
+                writer.println(line);
+            }
+            System.out.println("Thread 3: File writing complete.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+Output:
+Thread 1 (ConnectionClass): Connecting to database and retrieving data...
+[ WARN] (Thread-0) Error: 1045-28000: Access denied for user 'bethany'@'localhost' (using password: YES)
+java.sql.SQLInvalidAuthorizationSpecException: (conn=8) Access denied for user 'bethany'@'localhost' (using password: YES)
+        at org.mariadb.jdbc.export.ExceptionFactory.createException(ExceptionFactory.java:313)
+        at org.mariadb.jdbc.export.ExceptionFactory.create(ExceptionFactory.java:402)
+        at org.mariadb.jdbc.client.impl.StandardClient.authenticationHandler(StandardClient.java:513)
+        at org.mariadb.jdbc.client.impl.StandardClient.handleAuthentication(StandardClient.java:395)
+        at org.mariadb.jdbc.client.impl.StandardClient.setupConnection(StandardClient.java:189)
+        at org.mariadb.jdbc.client.impl.StandardClient.<init>(StandardClient.java:157)
+        at org.mariadb.jdbc.Driver.connect(Driver.java:75)
+        at org.mariadb.jdbc.Driver.connect(Driver.java:104)
+        at org.mariadb.jdbc.Driver.connect(Driver.java:29)
+        at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:613)
+        at java.sql/java.sql.DriverManager.getConnection(DriverManager.java:199)
+        at ConnectionClass.run(SequentialDataPipeline.java:60)
+Thread 2 (Process): Formatting data for CSV...
+Thread 2: Data processing complete.
+Thread 3 (WriteToFile): Writing data to commissions.csv...
+Thread 3: File writing complete.
+Main thread: Entire pipeline finished succ
+
+CSV FILE:
+SalesPerson,TotalCommission
+Amina Abadi,2916.58
+Arjun Mehta,2142.54
+Chloe Lefebvre,1780.02
+Diego Torres,2287.93
+Elena Ricci,2736.65
+Fatima Zahra,1056.96
+Hans Müller,2270.42
+Hiroshi Sato,3970.78
+Isabella Rossi,2496.45
+Kenji Tanaka,2242.63
+Lars Nielsen,1564.48
+Liam O’Connor,2914.36
+Lucas Meyer,1752.32
+Marcus Aurelius,1789.31
+Mateo Garcia,791.33
+Oliver Twist,1690.62
+Priya Sharma,639.97
+Sarah Jenkins,1323.30
+Sophie Dubois,1804.57
+Yuki Tanaka,2652.75
+
+Table: MariaDB [labwork]> SELECT* FROM salesmanview;
++-----------------+----------+------------+-------------+
+| Name            | City     | commission | TotalAmount |
++-----------------+----------+------------+-------------+
+| Arjun Mehta     | Sydney   |       0.12 |    17854.52 |
+| Sophie Dubois   | London   |       0.15 |    12030.48 |
+| Liam O’Connor   | Paris    |       0.13 |    22418.13 |
+| Isabella Rossi  | Paris    |       0.11 |    22694.97 |
+| Kenji Tanaka    | Berlin   |       0.12 |    18688.62 |
+| Hans Müller     | Berlin   |       0.12 |    18920.19 |
+| Elena Ricci     | San Jose |       0.11 |    24878.65 |
+| Marcus Aurelius | New York |       0.12 |    14910.92 |
+| Sarah Jenkins   | London   |       0.11 |    12029.98 |
+| Hiroshi Sato    | Paris    |       0.12 |    33089.87 |
+| Fatima Zahra    | Rome     |       0.12 |     8808.00 |
+| Mateo Garcia    | Madrid   |       0.11 |     7193.94 |
+| Chloe Lefebvre  | Toronto  |       0.13 |    13692.45 |
+| Lars Nielsen    | Berlin   |       0.13 |    12034.45 |
+| Priya Sharma    | Rome     |       0.11 |     5817.92 |
+| Diego Torres    | Tokyo    |       0.15 |    15252.85 |
+| Amina Abadi     | Rome     |       0.13 |    22435.20 |
+| Oliver Twist    | Berlin   |       0.13 |    13004.80 |
+| Yuki Tanaka     | New York |       0.11 |    24115.89 |
+| Lucas Meyer     | Madrid   |       0.11 |    15930.17 |
++-----------------+----------+------------+-------------+
+20 rows in set (0.057 sec)
