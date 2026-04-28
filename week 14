@@ -1,0 +1,226 @@
+/* 
+1.
+(a) Write a program that implements the Runnable interface to calculate the sum of numbers from 1 to
+100. The main thread should wait for this calculation to finish before printing the result. Note that the
+summation should be done in a thread, created with the Runnable interface, and the main() just displays
+the result.
+*/
+class ImplementsRunnable implements Runnable {
+    private int sum;
+
+    @Override
+    public void run() {
+        sum = 0;
+        for (int i = 1; i <= 100; i++) {
+            sum += i;
+        }
+    }
+
+    public int getSum() {
+        return sum;
+    }
+}
+/*
+(b) Create a class that extends the Thread interface to calculate the sum of numbers from 1 to 100. The
+main thread should wait for this calculation to finish before printing the result */
+class ExtendsThread extends Thread {
+    private int sum;
+
+    @Override
+    public void run() {
+        sum = 0;
+        for (int i = 1; i <= 100; i++) {
+            sum += i;
+        }
+    }
+
+    public int getSum() {
+        return sum;
+    }
+}
+public class Problem1{
+    public static void main(String[] args) {
+
+        ImplementsRunnable runnable = new ImplementsRunnable();
+        Thread t1 = new Thread(runnable);
+        t1.start();
+        ExtendsThread t2 = new ExtendsThread();
+        t2.start();
+
+        try {
+            t1.join(); // Wait for the thread to finish
+            t2.join(); // Wait for the thread to finish
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("The sum of numbers from 1 to 100 is: " + runnable.getSum());
+        System.out.println("The sum of numbers from 1 to 100 is: " + t2.getSum());
+    }
+}
+output: The sum of numbers from 1 to 100 is: 5050
+The sum of numbers from 1 to 100 is: 5050
+/*2. (a) Create a shared Counter class with a synchronized increment method (counter++).
+Start 10 threads that each increment the counter 1,000 times. Print final output of counter which must
+be 10,000 
+Then Explore these cases:
+(b) main thread joins the created thread after starting it.
+(c) main thread runs without joining any thread.
+(d) the increment method is not synchronized.*/
+
+public class Problem2 {
+    public static void main(String[] args) {
+        Counter counter = new Counter();
+        Thread[] threads = new Thread[10];
+
+        for (int i = 0; i < 10; i++) {
+            threads[i] = new Thread(() -> {
+                for (int j = 0; j < 1000; j++) {
+                    counter.increment();
+                }
+            });
+            threads[i].start();
+        }
+
+        // Join the threads to ensure they finish before printing the result
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("Final counter value: " + counter.getCounter());
+    }
+}
+class Counter {
+    private int counter = 0;
+
+    public synchronized void increment() {
+        counter++;
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+}
+output:
+Final counter value: 10000
+/*3. Write a java program that takes an integer, n, as command line argument. Then it should create an
+array of n small integer (say between 1 and 100). The task is to calculate the sum of squares of the
+integers in the array. You can do this calculation in a straight-forward way using a loop. Do it, and see
+how many nanoseconds it takes, for a chosen value of n. Then do the same task, by taking the first half
+the array and summing up square in one thread, and summing up the squares of the rest in another
+thread, and then combining the results to get the total sum. Time the second way doing the task
+
+Start with n =100, and keep increasing its value by a factor of 10, up to 100,000,000. Write down the
+times for both threaded and non-threaded calculations. With n on the x-axis and time required on the y-
+axis, plot the results for threaded and non-threaded tasks. What do you observe? Can you explain this?
+(you can divide nanoseconds by appropriate numbers to get milliseconds which may be easier to plot. )
+*/
+
+public class Problem3 {
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Usage: java Problem3 <number_of_elements>");
+            return;
+        }
+
+        int n = Integer.parseInt(args[0]);
+        int[] numbers = new int[n];
+        for (int i = 0; i < n; i++) {
+            numbers[i] = (int) (Math.random() * 100) + 1;
+        }
+
+        // --- Non-threaded calculation ---
+        long startTime = System.nanoTime();
+        SumSquares singleTask = new SumSquares(numbers, 0, n);
+        singleTask.calculate();
+        long nonThreadedTime = System.nanoTime() - startTime;
+
+        // --- Threaded calculation ---
+        startTime = System.nanoTime();
+        SumSquares task1 = new SumSquares(numbers, 0, n / 2);
+        SumSquares task2 = new SumSquares(numbers, n / 2, n);
+        
+        Thread t1 = new Thread(task1::calculate); 
+        Thread t2 = new Thread(task2::calculate);
+
+        t1.start();
+        t2.start();
+
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        long totalSum = task1.getSum() + task2.getSum();
+        long threadedTime = System.nanoTime() - startTime;
+
+        // Display Results (Converting to milliseconds for readability)
+        System.out.println("N = " + n);
+        System.out.println("Non-threaded time: " + (nonThreadedTime / 1_000_000.0) + " ms");
+        System.out.println("Threaded time:     " + (threadedTime / 1_000_000.0) + " ms");
+        System.out.println("Total Sum of Squares: " + totalSum);
+    }
+}
+
+class SumSquares {
+    private final int[] numbers;
+    private final int start, end;
+    private long sum;
+
+    public SumSquares(int[] numbers, int start, int end) {
+        this.numbers = numbers;
+        this.start = start;
+        this.end = end;
+    }
+
+    public void calculate() {
+        long localSum = 0; 
+        for (int i = start; i < end; i++) {
+            localSum += (long) numbers[i] * numbers[i];
+        }
+        this.sum = localSum;
+    }
+
+    public long getSum() { 
+        return sum; 
+    }
+}
+PS C:\Users\badle\OneDrive\PPC\Assign_14> java c:\Users\badle\OneDrive\PPC\Assign_14\Problem3.java 100
+N = 100
+Non-threaded time: 0.0973 ms
+Threaded time:     1.8734 ms
+PS C:\Users\badle\OneDrive\PPC\Assign_14> java c:\Users\badle\OneDrive\PPC\Assign_14\Problem3.java 1000
+N = 1000
+Non-threaded time: 0.0966 ms
+Threaded time:     2.0274 ms
+PS C:\Users\badle\OneDrive\PPC\Assign_14> java c:\Users\badle\OneDrive\PPC\Assign_14\Problem3.java 10000
+N = 10000
+Non-threaded time: 0.2468 ms
+Threaded time:     1.9917 ms
+PS C:\Users\badle\OneDrive\PPC\Assign_14> java c:\Users\badle\OneDrive\PPC\Assign_14\Problem3.java 10000
+N = 10000
+Non-threaded time: 0.241 ms
+Threaded time:     1.8547 ms
+PS C:\Users\badle\OneDrive\PPC\Assign_14> java c:\Users\badle\OneDrive\PPC\Assign_14\Problem3.java 100000
+N = 100000
+Non-threaded time: 1.5683 ms
+Threaded time:     3.6359 ms
+PS C:\Users\badle\OneDrive\PPC\Assign_14> java c:\Users\badle\OneDrive\PPC\Assign_14\Problem3.java 1000000
+N = 1000000
+Non-threaded time: 3.5317 ms
+Threaded time:     9.31 ms
+PS C:\Users\badle\OneDrive\PPC\Assign_14> java c:\Users\badle\OneDrive\PPC\Assign_14\Problem3.java 10000000
+N = 10000000
+Non-threaded time: 8.2567 ms
+Threaded time:     10.0112 ms
+PS C:\Users\badle\OneDrive\PPC\Assign_14> java c:\Users\badle\OneDrive\PPC\Assign_14\Problem3.java 100000000
+N = 100000000
+Non-threaded time: 33.6372 ms
+Threaded time:     26.9083 ms
+PS C:\Users\badle\OneDrive\PPC\Assign_14> 
